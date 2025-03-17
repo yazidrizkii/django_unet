@@ -1,0 +1,63 @@
+<html>
+<head>
+    <title>Deteksi Kelainan Impaksi Gigi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="bg-blue-800 text-white w-64 p-4">
+            <div class="text-lg font-semibold mb-6">Deteksi Kelainan Impaksi Gigi</div>
+            <ul>
+                <li class="mb-4">
+                    <a href="{% url 'segmentasi_app:home' %}" class="flex items-center w-full p-2 bg-gray-200 text-black rounded">
+                        <i class="fas fa-home mr-2"></i> Beranda
+                    </a>
+                </li>
+                <li>
+                    <a href="" class="flex items-center w-full p-2 bg-gray-200 text-black rounded">
+                        <i class="fas fa-cut mr-2"></i> Segmentasi
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <!-- Main Content -->
+        <div class="flex-1 p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl font-semibold">Segmentasi</h1>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-lg font-semibold mb-2">Upload</h2>
+                <p class="mb-4">Masukkan gambar radiograf panoramik untuk mendeteksi gigi impaksi</p>
+                <form method="post" enctype="multipart/form-data" action="{% url 'segmentasi_app:upload' %}">
+                    {% csrf_token %}
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                        <input type="file" id="fileInput" name="image" accept="image/*" class="hidden" required />
+                        <label for="fileInput" class="cursor-pointer">
+                            <i class="fas fa-plus text-2xl text-gray-400 mb-2"></i>
+                            <p class="text-gray-400">Masukkan Gambar</p>
+                        </label>
+                        <div id="imagePreview" class="mt-4"></div>
+                    </div>
+                    <button type="submit" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg">Upload</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imagePreview = document.getElementById('imagePreview');
+                    imagePreview.innerHTML = `<img src="${e.target.result}" alt="Preview" class="max-w-full h-auto rounded-lg" />`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</body>
+</html>
