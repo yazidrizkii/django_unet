@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -60,5 +60,32 @@
             <a href="{% url 'segmentasi_app:home' %}">Kembali ke Halaman Utama</a>
         </div>
     </div>
+</body>
+</html> -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hasil Segmentasi</title>
+</head>
+<body>
+    <h1>Hasil Segmentasi</h1>
+    
+    {% if image %}
+        <h3>Gambar Asli</h3>
+        <img src="{{ image.image.url }}" alt="Uploaded Image" width="400px">
+    {% endif %}
+    
+    {% if segmented_image_url %}
+        <h3>Hasil Segmentasi</h3>
+        <img src="{{ segmented_image_url }}" alt="Segmented Image" width="400px">
+    {% endif %}
+
+    <p>URL Gambar Asli: {{ image.image.url }}</p>
+<p>URL Gambar Segmentasi: {{ segmented_image_url }}</p>
+
+    <br><br>
+    <a href="{% url 'segmentasi_app:upload' %}">Upload Gambar Lain</a>
 </body>
 </html>
