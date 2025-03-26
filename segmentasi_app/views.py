@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from django.shortcuts import render, redirect
 from django.conf import settings
+from django.http import JsonResponse
 import os
 from .forms import UploadImageForm
 from .models import UploadedImage
@@ -55,20 +56,28 @@ def upload(request):
         if form.is_valid():
             uploaded_image = form.save()
             image_path = uploaded_image.image.path
-
+            
             # Jalankan prediksi U-Net
             segmented_image_url = predict_unet(image_path)
 
-            return render(request, 'segmentasi_app/hasil.html', {
-                'image': uploaded_image,
-                'segmented_image_url': segmented_image_url
+            # Kembalikan respons JSON untuk AJAX
+            return JsonResponse({
+                'success': True,
+                'original_image_url': uploaded_image.image.url,
+                'segmented_image_url': segmented_image_url,
             })
-    else:
-        form = UploadImageForm()
-    return render(request, 'segmentasi_app/upload.html', {'form': form})
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': 'Form tidak valid',
+            })
+    return JsonResponse({
+        'success': False,
+        'error': 'Metode tidak diizinkan',
+    })
 
 def home(request):
-    return render(request, 'segmentasi_app/home.html')
+    return render(request, 'segmentasi_app/index.html')
 
 def hasil(request):
     # Ambil gambar terakhir yang diupload

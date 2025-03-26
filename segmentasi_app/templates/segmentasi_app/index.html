@@ -1,0 +1,245 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Deteksi Kelainan Impaksi Gigi</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}" />
+</head>
+
+<body>
+    <!-- Tambahkan CSRF token di sini -->
+    {% csrf_token %}
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h1 class="sidebar-title">Deteksi Kelainan Impaksi Gigi</h1>
+
+            <button id="full-radiograf-btn" class="sidebar-button active">
+                <img src="image-icon.svg" alt="" class="sidebar-icon" />
+                <span>Full Radiograf Impaksi</span>
+            </button>
+
+            <button id="cropped-radiograf-btn" class="sidebar-button">
+                <img src="crop-icon.svg" alt="" class="sidebar-icon" />
+                <span>Cropped Radiograf Impaksi</span>
+            </button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Full Radiograf Page -->
+            <div id="full-radiograf-page" class="content-page active">
+                <div class="content-card">
+                    <h2 class="page-title">Segmentasi</h2>
+
+                    <div class="upload-section">
+                        <h3 class="section-title">Upload</h3>
+                        <p class="section-description">
+                            Masukkan gambar radiograf panoramik untuk mendeteksi gigi impaksi
+                        </p>
+
+                        <div id="full-upload-area" class="upload-area">
+                            <div id="full-placeholder" class="upload-placeholder">
+                                <div class="upload-icon">+</div>
+                                <p class="upload-text">Klik di sini untuk memilih gambar</p>
+                                <p class="upload-hint">
+                                    Format yang didukung: JPG, PNG, JPEG
+                                </p>
+                            </div>
+                            <div id="full-preview-container" class="preview-container" style="display: none">
+                                <img id="full-preview" class="image-preview" src="/placeholder.svg"
+                                    alt="Preview gambar" />
+                                <div class="image-overlay">
+                                    <button id="full-change-image" class="overlay-button">
+                                        Ganti Gambar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Tambahkan name="image" agar sesuai dengan form di backend -->
+                        <input id="full-file-input" type="file" name="image" accept="image/*" class="file-input"
+                            style="display: none" />
+
+                        <div class="status-message" id="full-status-message"></div>
+
+                        <div class="button-group">
+                            <button id="full-upload-btn" class="upload-button" disabled>
+                                <span class="button-text">Proses Gambar</span>
+                                <div class="spinner" style="display: none"></div>
+                            </button>
+                            <button id="full-reset-btn" class="reset-button" disabled>
+                                Hapus Gambar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Processing Indicator -->
+                    <div id="full-processing" class="processing-section" style="display: none">
+                        <div class="processing-container">
+                            <div class="processing-spinner"></div>
+                            <div class="processing-text">
+                                <h4>Memproses Gambar...</h4>
+                                <p>
+                                    Sistem sedang menganalisis radiograf untuk mendeteksi impaksi gigi
+                                </p>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div id="full-progress-bar" class="progress-bar"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Results Section -->
+                    <div id="full-results" class="results-section" style="display: none">
+                        <h3 class="section-title">Hasil Deteksi</h3>
+                        <div class="results-container">
+                            <div class="results-grid">
+                                <div class="result-item">
+                                    <h4 class="result-title">Gambar Asli</h4>
+                                    <div class="result-image-container">
+                                        <img id="full-original" class="result-image" src="/placeholder.svg"
+                                            alt="Original radiograph" />
+                                    </div>
+                                </div>
+                                <div class="result-item">
+                                    <h4 class="result-title">Hasil Segmentasi</h4>
+                                    <div class="result-image-container">
+                                        <img id="full-segmented" class="result-image" src="/placeholder.svg"
+                                            alt="Segmented radiograph" />
+                                        <div class="detection-label">
+                                            <p class="detection-text">
+                                                Terdeteksi: Gigi impaksi pada area molar ketiga
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="analysis-box">
+                                <h4 class="analysis-title">Analisis:</h4>
+                                <p class="analysis-text">
+                                    Terdeteksi impaksi gigi pada area molar ketiga rahang bawah.
+                                    Posisi gigi menunjukkan impaksi mesioangular dengan sudut
+                                    kemiringan 45°. Disarankan untuk melakukan konsultasi dengan
+                                    dokter gigi spesialis bedah mulut.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cropped Radiograf Page -->
+            <div id="cropped-radiograf-page" class="content-page">
+                <div class="content-card">
+                    <h2 class="page-title">Segmentasi</h2>
+
+                    <div class="upload-section">
+                        <h3 class="section-title">Upload</h3>
+                        <p class="section-description">
+                            Masukkan gambar radiograf panoramik untuk mendeteksi gigi impaksi
+                        </p>
+
+                        <div id="cropped-upload-area" class="upload-area">
+                            <div id="cropped-placeholder" class="upload-placeholder">
+                                <div class="upload-icon">+</div>
+                                <p class="upload-text">Klik di sini untuk memilih gambar</p>
+                                <p class="upload-hint">
+                                    Format yang didukung: JPG, PNG, JPEG
+                                </p>
+                            </div>
+                            <div id="cropped-preview-container" class="preview-container" style="display: none">
+                                <img id="cropped-preview" class="image-preview" src="/placeholder.svg"
+                                    alt="Preview gambar" />
+                                <div class="image-overlay">
+                                    <button id="cropped-change-image" class="overlay-button">
+                                        Ganti Gambar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Tambahkan name="image" agar sesuai dengan form di backend -->
+                        <input id="cropped-file-input" type="file" name="image" accept="image/*" class="file-input"
+                            style="display: none" />
+
+                        <div class="status-message" id="cropped-status-message"></div>
+
+                        <div class="button-group">
+                            <button id="cropped-upload-btn" class="upload-button" disabled>
+                                <span class="button-text">Proses Gambar</span>
+                                <div class="spinner" style="display: none"></div>
+                            </button>
+                            <button id="cropped-reset-btn" class="reset-button" disabled>
+                                Hapus Gambar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Processing Indicator -->
+                    <div id="cropped-processing" class="processing-section" style="display: none">
+                        <div class="processing-container">
+                            <div class="processing-spinner"></div>
+                            <div class="processing-text">
+                                <h4>Memproses Gambar...</h4>
+                                <p>
+                                    Sistem sedang menganalisis radiograf untuk mendeteksi impaksi gigi
+                                </p>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div id="cropped-progress-bar" class="progress-bar"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Results Section -->
+                    <div id="cropped-results" class="results-section" style="display: none">
+                        <h3 class="section-title">Hasil Deteksi</h3>
+                        <div class="results-container">
+                            <div class="results-grid">
+                                <div class="result-item">
+                                    <h4 class="result-title">Gambar Asli</h4>
+                                    <div class="result-image-container">
+                                        <img id="cropped-original" class="result-image" src="/placeholder.svg"
+                                            alt="Original radiograph" />
+                                    </div>
+                                </div>
+                                <div class="result-item">
+                                    <h4 class="result-title">Hasil Segmentasi</h4>
+                                    <div class="result-image-container">
+                                        <img id="cropped-segmented" class="result-image" src="/placeholder.svg"
+                                            alt="Segmented radiograph" />
+                                        <!-- <div class="detection-label">
+                                            <p class="detection-text">
+                                                Terdeteksi: Gigi impaksi pada area molar ketiga
+                                            </p>
+                                        </div> -->
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- <div class="analysis-box">
+                                <h4 class="analysis-title">Analisis:</h4>
+                                <p class="analysis-text">
+                                    Terdeteksi impaksi gigi pada area molar ketiga rahang bawah.
+                                    Posisi gigi menunjukkan impaksi mesioangular dengan sudut
+                                    kemiringan 45°. Disarankan untuk melakukan konsultasi dengan
+                                    dokter gigi spesialis bedah mulut.
+                                </p>
+                            </div> -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var uploadUrl = "{% url 'segmentasi_app:upload' %}";
+    </script>
+    <script src="{% static 'script.js' %}"></script>
+</body>
+
+</html>
