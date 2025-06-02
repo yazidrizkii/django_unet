@@ -8,7 +8,6 @@ Created on Mon Nov 19 14:24:49 2018
 
 import torch
 import torch.nn as nn
-from torchsummary import summary
 
 def double_conv(in_channels, out_channels):
     return nn.Sequential(
@@ -66,8 +65,3 @@ class UNet(nn.Module):
         out = self.conv_last(x)
         
         return out
-    
-#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-#cuda_avail = torch.cuda.is_available()
-#model = UNet(n_class=1).to(device)
-#summary(model, input_size=(1, 224, 224))

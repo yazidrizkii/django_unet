@@ -1,76 +1,86 @@
 import torch
 import numpy as np
-import matplotlib.pyplot as plt
-from django.shortcuts import render, redirect
+import os
+from django.shortcuts import render
 from django.conf import settings
 from django.http import JsonResponse
-import os
 from .forms import UploadImageForm
 from .models import UploadedImage
 from PIL import Image
-from torchvision import transforms
-from .unet import UNet
+from .prediction_utils import ToothImpactionPredictor
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+# Initialize predictor (you'll need to update these paths to your actual model files)
+CROP_MODEL_PATH = os.path.join(settings.BASE_DIR, 'segmentasi_app', 'model', 'crop_model.pth')
+FULL_MODEL_PATH = os.path.join(settings.BASE_DIR, 'segmentasi_app', 'model', 'full_model.pth')
 
-num_class = 1
-model = UNet(num_class).to(device)
-model.load_state_dict(torch.load(os.path.join(settings.BASE_DIR, 'segmentasi_app', 'model', 'New_Model.pth')))
-model.eval()
+# Global predictor instance
+predictor = None
 
-transform = transforms.Compose([
-    transforms.Grayscale(num_output_channels=1),
-    transforms.Resize((256, 256)), 
-    transforms.ToTensor(),
-])
-
-def predict_unet(image_path):
-    """Fungsi untuk melakukan prediksi segmentasi"""
-    image = Image.open(image_path).convert("L")  # Convert ke grayscale
-
-    if image.format == "TIFF":
-        temp_path = image_path.replace(".tif", ".png").replace(".tiff", ".png")
-        image.save(temp_path)
-        image_path = temp_path 
-
-    image = transform(image).unsqueeze(0).to(device)
-
-    with torch.no_grad():
-        pred = model(image)
-        pred = torch.sigmoid(pred).cpu().numpy()[0, 0]  # Ambil output pertama
-
-    pred_binary = (pred > 0.5).astype(np.uint8) * 255  # Binarisasi output
-
-    result_path = os.path.join(settings.MEDIA_ROOT, 'results', os.path.basename(image_path))
-    os.makedirs(os.path.dirname(result_path), exist_ok=True)
-    result_path = result_path.replace(".tif", ".png")  # Ganti format ke PNG
-    Image.fromarray(pred_binary).save(result_path, format="PNG")
-    # Image.fromarray(pred_binary).save(result_path)
-
-    # return os.path.join(settings.MEDIA_URL, 'results', os.path.basename(image_path))
-    return f"{settings.MEDIA_URL}results/{os.path.basename(result_path)}"
+def get_predictor():
+    global predictor
+    if predictor is None:
+        try:
+            predictor = ToothImpactionPredictor(CROP_MODEL_PATH, FULL_MODEL_PATH)
+        except Exception as e:
+            print(f"Error loading models: {e}")
+            # Fallback to single model if separate models don't exist
+            single_model_path = os.path.join(settings.BASE_DIR, 'segmentasi_app', 'model', 'bce_7000_100epoch.pth')
+            predictor = ToothImpactionPredictor(single_model_path, single_model_path)
+    return predictor
 
 def upload(request):
     if request.method == 'POST':
         form = UploadImageForm(request.POST, request.FILES)
         if form.is_valid():
-            uploaded_image = form.save()
-            image_path = uploaded_image.image.path
-            
-            # Jalankan prediksi U-Net
-            segmented_image_url = predict_unet(image_path)
-
-            # Kembalikan respons JSON untuk AJAX
-            return JsonResponse({
-                'success': True,
-                'original_image_url': uploaded_image.image.url,
-                'segmented_image_url': segmented_image_url,
-            })
+            try:
+                uploaded_image = form.save()
+                image_path = uploaded_image.image.path
+                
+                # Get prediction type from request (default to crop)
+                prediction_type = request.POST.get('prediction_type', 'crop')
+                
+                # Get predictor instance
+                tooth_predictor = get_predictor()
+                
+                # Perform prediction
+                results = tooth_predictor.predict(image_path, prediction_type)
+                
+                # Save annotated results
+                base_filename = os.path.basename(image_path)
+                name, ext = os.path.splitext(base_filename)
+                base_filename = f"{name}.png"  # Convert to PNG for consistency
+                
+                saved_results = tooth_predictor.save_results(
+                    results['input_image'], 
+                    results['prediction'], 
+                    base_filename
+                )
+                
+                # Prepare response data
+                response_data = {
+                    'success': True,
+                    'original_image_url': uploaded_image.image.url,
+                    'annotated_image_url': saved_results['annotated_url'],
+                    'mask_image_url': saved_results['mask_url'],
+                    'confidence': round(results['confidence'] * 100, 2),
+                    'impaction_percentage': round(results['impaction_percentage'], 2),
+                    'has_impaction': results['has_impaction'],
+                    'prediction_type': prediction_type
+                }
+                
+                return JsonResponse(response_data)
+                
+            except Exception as e:
+                return JsonResponse({
+                    'success': False,
+                    'error': f'Error during prediction: {str(e)}',
+                })
         else:
             return JsonResponse({
                 'success': False,
                 'error': 'Form tidak valid',
             })
+    
     return JsonResponse({
         'success': False,
         'error': 'Metode tidak diizinkan',

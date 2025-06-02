@@ -61,7 +61,6 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Tambahkan name="image" agar sesuai dengan form di backend -->
                         <input id="full-file-input" type="file" name="image" accept="image/*" class="file-input"
                             style="display: none" />
 
@@ -112,7 +111,7 @@
                                         <img id="full-segmented" class="result-image" src="/placeholder.svg"
                                             alt="Segmented radiograph" />
                                         <div class="detection-label">
-                                            <p class="detection-text">
+                                            <p id="full-detection-text" class="detection-text">
                                                 Terdeteksi: Gigi impaksi pada area molar ketiga
                                             </p>
                                         </div>
@@ -121,11 +120,18 @@
                             </div>
                             <div class="analysis-box">
                                 <h4 class="analysis-title">Analisis:</h4>
-                                <p class="analysis-text">
-                                    Terdeteksi impaksi gigi pada area molar ketiga rahang bawah.
-                                    Posisi gigi menunjukkan impaksi mesioangular dengan sudut
-                                    kemiringan 45°. Disarankan untuk melakukan konsultasi dengan
-                                    dokter gigi spesialis bedah mulut.
+                                <div class="metrics-container">
+                                    <div class="metric-item">
+                                        <span class="metric-label">Confidence:</span>
+                                        <span id="full-confidence" class="metric-value">-</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">Area Impaksi:</span>
+                                        <span id="full-impaction-area" class="metric-value">-</span>
+                                    </div>
+                                </div>
+                                <p id="full-analysis-text" class="analysis-text">
+                                    Analisis akan ditampilkan setelah pemrosesan gambar selesai.
                                 </p>
                             </div>
                         </div>
@@ -141,7 +147,7 @@
                     <div class="upload-section">
                         <h3 class="section-title">Upload</h3>
                         <p class="section-description">
-                            Masukkan gambar radiograf panoramik untuk mendeteksi gigi impaksi
+                            Masukkan gambar radiograf yang sudah di-crop untuk mendeteksi gigi impaksi
                         </p>
 
                         <div id="cropped-upload-area" class="upload-area">
@@ -162,7 +168,6 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Tambahkan name="image" agar sesuai dengan form di backend -->
                         <input id="cropped-file-input" type="file" name="image" accept="image/*" class="file-input"
                             style="display: none" />
 
@@ -212,23 +217,30 @@
                                     <div class="result-image-container">
                                         <img id="cropped-segmented" class="result-image" src="/placeholder.svg"
                                             alt="Segmented radiograph" />
-                                        <!-- <div class="detection-label">
-                                            <p class="detection-text">
+                                        <div class="detection-label">
+                                            <p id="cropped-detection-text" class="detection-text">
                                                 Terdeteksi: Gigi impaksi pada area molar ketiga
                                             </p>
-                                        </div> -->
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <!-- <div class="analysis-box">
+                            <div class="analysis-box">
                                 <h4 class="analysis-title">Analisis:</h4>
-                                <p class="analysis-text">
-                                    Terdeteksi impaksi gigi pada area molar ketiga rahang bawah.
-                                    Posisi gigi menunjukkan impaksi mesioangular dengan sudut
-                                    kemiringan 45°. Disarankan untuk melakukan konsultasi dengan
-                                    dokter gigi spesialis bedah mulut.
+                                <div class="metrics-container">
+                                    <div class="metric-item">
+                                        <span class="metric-label">Confidence:</span>
+                                        <span id="cropped-confidence" class="metric-value">-</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">Area Impaksi:</span>
+                                        <span id="cropped-impaction-area" class="metric-value">-</span>
+                                    </div>
+                                </div>
+                                <p id="cropped-analysis-text" class="analysis-text">
+                                    Analisis akan ditampilkan setelah pemrosesan gambar selesai.
                                 </p>
-                            </div> -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -237,7 +249,7 @@
     </div>
 
     <script>
-        var uploadUrl = "{% url 'segmentasi_app:upload' %}";
+        window.uploadUrl = "{% url 'segmentasi_app:upload' %}";
     </script>
     <script src="{% static 'script.js' %}"></script>
 </body>
